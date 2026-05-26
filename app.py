@@ -1,6 +1,6 @@
 import streamlit as st
 import pypdf
-from google import genai  # <-- New import for the AI
+from google import genai  #import for the AI
 
 # 1. Page Configuration
 st.set_page_config(page_title="Smart Doc Analyzer", page_icon="🤖")
@@ -32,7 +32,7 @@ if api_key:
         
         st.info(f"Successfully extracted {len(pdf_reader.pages)} pages of text.")
 
-        # --- FINAL AI CODE STARTS HERE ---
+        
         # 6. User Question Input Box
         user_question = st.text_input("Ask a question about this document:")
 
@@ -53,7 +53,6 @@ if api_key:
                     User Question: {user_question}
                     """
 
-                   # --- UPDATED AI CALL WITH FALLBACK ---
                     try:
                         # Attempt to use the primary model
                         response = client.models.generate_content(
@@ -67,15 +66,13 @@ if api_key:
                             model='gemini-2.5-flash-lite',  # Light backup model
                             contents=prompt,
                         )
-                    # --- END OF UPDATED SECTION ---
                     
                     
-                    # 7. Display the AI's answer beautifully
                     st.subheader("Answer:")
                     st.write(response.text)
 
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
-        # --- FINAL AI CODE ENDS HERE ---
+                    
 else:
     st.sidebar.warning("Please enter your Gemini API Key to unlock the app!")
