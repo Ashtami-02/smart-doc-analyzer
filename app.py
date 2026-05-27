@@ -1,6 +1,6 @@
 import streamlit as st
 import pypdf
-from google import genai  #import for the AI
+from google import genai  # import for the AI
 
 # 1. Page Configuration
 st.set_page_config(page_title="Smart Doc Analyzer", page_icon="🤖")
@@ -9,20 +9,25 @@ st.set_page_config(page_title="Smart Doc Analyzer", page_icon="🤖")
 st.title("🤖 Smart Document Analyzer")
 st.write("Upload a PDF and ask questions about its content.")
 
-# 3. Sidebar for API Key
-api_key = st.sidebar.text_input("Enter your Gemini API Key:", type="password")
+# 3. Handle API Key Retrieval (Cloud Secrets vs Local Sidebar Fallback)
+api_key = None
 
-# 4. File Uploader Layout
-uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
-
-# Check if the user has provided the API key yet
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
 else:
-    # Fallback for local testing just in case
+    # Fallback for local testing if secrets are missing
     api_key = st.sidebar.text_input("Enter your Gemini API Key:", type="password")
-    
-    # 5. Visual feedback and Text Extraction
+    if not api_key:
+        st.sidebar.warning("Please enter your Gemini API Key to unlock the app!")
+
+# 4. Core Application Logic (Runs ONLY if we have an API Key)
+if api_key:
+    # Initialize the Gemini Client securely
+    client = genai.Client(api_key=api_key)
+
+    # 5. File Uploader Layout
+    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+
     if uploaded_file is not None:
         st.success("File uploaded successfully!")
         
@@ -33,7 +38,6 @@ else:
             document_text += page.extract_text() + "\n"
         
         st.info(f"Successfully extracted {len(pdf_reader.pages)} pages of text.")
-
         
         # 6. User Question Input Box
         user_question = st.text_input("Ask a question about this document:")
@@ -41,7 +45,7 @@ else:
         if user_question:
             with st.spinner("Analyzing document and thinking..."):
                 try:
-                    # Constructing the RAG prompt (Instructing the LLM)
+                    # Constructing the RAG prompt
                     prompt = f"""
                     You are an expert document assistant. Below is the content of an uploaded document.
                     Use ONLY the provided document text to answer the user's question. If the answer cannot 
@@ -65,16 +69,12 @@ else:
                         # If Flash is down, fallback to the ultra-lightweight Flash-Lite model
                         st.warning("Primary model busy, switching to backup model...")
                         response = client.models.generate_content(
-                            model='gemini-2.5-flash-lite',  # Light backup model
+                            model='gemini-2.5-flash-lite',
                             contents=prompt,
                         )
-                    
                     
                     st.subheader("Answer:")
                     st.write(response.text)
 
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
-                    
-else:
-    st.sidebar.warning("Please enter your Gemini API Key to unlock the app!")
