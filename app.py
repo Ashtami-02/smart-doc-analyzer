@@ -16,10 +16,12 @@ api_key = st.sidebar.text_input("Enter your Gemini API Key:", type="password")
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 # Check if the user has provided the API key yet
-if api_key:
-    # Initialize the Gemini Client using the new 2026 Google GenAI SDK
-    client = genai.Client(api_key=api_key)
-
+if "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
+else:
+    # Fallback for local testing just in case
+    api_key = st.sidebar.text_input("Enter your Gemini API Key:", type="password")
+    
     # 5. Visual feedback and Text Extraction
     if uploaded_file is not None:
         st.success("File uploaded successfully!")
