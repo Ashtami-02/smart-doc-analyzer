@@ -10,7 +10,6 @@ A lightweight Streamlit app that lets you upload a PDF and ask questions about i
 - 🔁 Automatic fallback from `gemini-2.5-flash` to `gemini-2.5-flash-lite` if the primary model is unavailable
 - 🔑 Flexible API key handling — reads from Streamlit secrets in the cloud, or prompts for a key locally
 
- Getting Started
 
 Prerequisites
 - Python 3.9+
